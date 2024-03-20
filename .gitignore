@@ -1,4 +1,2 @@
-.env
-index.html
-k2.JPG
-pau-watcher.exe
+app.env
+*.exe

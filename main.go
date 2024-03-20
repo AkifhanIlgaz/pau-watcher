@@ -2,17 +2,14 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/AkifhanIlgaz/pau-watcher/config"
+	"github.com/AkifhanIlgaz/pau-watcher/telegram"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/joho/godotenv"
-	"github.com/mymmrac/telego"
 )
 
 /*
@@ -38,29 +35,17 @@ const TxBuy = "IN"
 const TxSell = "OUT"
 
 func main() {
-	godotenv.Load()
-
-	telegramToken := os.Getenv("TELEGRAM_TOKEN")
-	chatId, err := strconv.Atoi(os.Getenv("CHAT_ID"))
+	cfg, err := config.Load("./")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bot, err := telego.NewBot(telegramToken, telego.WithDefaultDebugLogger())
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	chat, err := bot.GetChat(&telego.GetChatParams{ChatID: telego.ChatID{ID: int64(chatId)}})
+	bot, err := telegram.NewBot(*cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = bot.SendMessage(&telego.SendMessageParams{ChatID: chat.ChatID(), Text: `<a href="http://www.example.com/">inline URL</a>`, ParseMode: "HTML"})
-	if err != nil {
-		log.Fatal(err)
-	}
+	bot.Send()
 
 	// resp, err := http.Get(pauUrl)
 	// if err != nil {
