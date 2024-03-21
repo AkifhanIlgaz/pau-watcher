@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/AkifhanIlgaz/pau-watcher/config"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -20,11 +21,11 @@ type Parser struct {
 	scanUrl string
 }
 
-func NewParser(chain string, searchAddress string) Parser {
-	scanUrl, _ := url.Parse(chainToScan[chain])
+func NewParser(cfg *config.Config) Parser {
+	scanUrl, _ := url.Parse(chainToScan[cfg.Chain])
 
 	values := url.Values{}
-	values.Add("a", searchAddress)
+	values.Add("a", cfg.Pau)
 
 	scanUrl.RawQuery = values.Encode()
 
@@ -33,23 +34,23 @@ func NewParser(chain string, searchAddress string) Parser {
 	}
 }
 
-func (parser *Parser) Parse() (*Transaction, error) {
+func (parser *Parser) Parse() (Transaction, error) {
 	resp, err := http.Get(parser.scanUrl)
 	if err != nil {
-		return nil, fmt.Errorf("parse transaction: %w", err)
+		return Transaction{}, fmt.Errorf("parse transaction: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	document, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("parse transaction: %w", err)
+		return Transaction{}, fmt.Errorf("parse transaction: %w", err)
 	}
 
 	tx, err := lastTransaction(document)
 	if err != nil {
-		return nil, fmt.Errorf("parse transaction: %w", err)
+		return Transaction{}, fmt.Errorf("parse transaction: %w", err)
 	}
 
-	return &tx, nil
+	return tx, nil
 }

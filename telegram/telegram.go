@@ -20,7 +20,7 @@ type Bot struct {
 	config.Config
 }
 
-func NewBot(config config.Config) (Bot, error) {
+func NewBot(config *config.Config) (Bot, error) {
 	bot, err := telego.NewBot(config.TelegramToken)
 	if err != nil {
 		return Bot{}, fmt.Errorf("new bot: %w", err)
@@ -34,26 +34,27 @@ func NewBot(config config.Config) (Bot, error) {
 	return Bot{
 		Bot:    bot,
 		Chat:   chat,
-		Config: config,
+		Config: *config,
 	}, nil
 }
 
-func (bot Bot) Send(tx *transaction.Transaction) {
+func (bot Bot) Send(tx transaction.Transaction, chain string) {
 	markup := &telego.InlineKeyboardMarkup{}
 	buttons := []telego.InlineKeyboardButton{
 		{Text: "Trade on UniSwap",
 			// TODO: Get chain from tx
-			URL: generateSwapUrl(uniswap, "base", tx.Token, tx.Type)},
+			URL: generateSwapUrl(uniswap, chain, tx.Token, tx.Type)},
 		{Text: "See on DexScreener",
 			URL: generateDexUrl("base", tx.Token, bot.Pau)},
 	}
 
 	var sb strings.Builder
-	sb.WriteString("<i>CALL</i>\n")
-	sb.WriteString(`<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>`)
-	sb.WriteString("😀")
 	sb.WriteString(fmt.Sprintf("<b>%v</b>\n", tx.Token.Name))
-	sb.WriteString(fmt.Sprintf("<b>%v</b>\n", tx.Type))
+	if tx.Type == "IN" {
+		sb.WriteString("🟢 <i>Buy</i>")
+	} else {
+		sb.WriteString("🔴 <i>Sell</i>")
+	}
 
 	defer sb.Reset()
 

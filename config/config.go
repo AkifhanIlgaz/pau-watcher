@@ -10,6 +10,7 @@ type Config struct {
 	TelegramToken string `mapstructure:"TELEGRAM_TOKEN"`
 	ChatId        int64  `mapstructure:"CHAT_ID"`
 	Pau           string `mapstructure:"PAU"`
+	Chain         string
 }
 
 func Load(path string) (*Config, error) {

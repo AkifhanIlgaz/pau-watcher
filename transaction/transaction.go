@@ -9,6 +9,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+
 type Transaction struct {
 	Timestamp time.Time
 	Type      string
@@ -87,9 +89,12 @@ func parseToken(tx *goquery.Selection) (Token, error) {
 		}
 
 		fields := strings.Split(u.Path, "/")
+		if fields[len(fields)-1] == USDC {
+			error = errors.New("USDC transaction")
+			return
+		}
 
 		token.Address = fields[len(fields)-1]
-
 	})
 
 	return token, error
