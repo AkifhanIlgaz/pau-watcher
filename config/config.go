@@ -1,8 +1,10 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -14,6 +16,15 @@ type Config struct {
 }
 
 func Load(path string) (*Config, error) {
+	var config Config
+
+	pflag.StringVar(&config.Chain, "chain", "", "Chain")
+	pflag.Parse()
+
+	if len(config.Chain) == 0 {
+		return nil, errors.New("chain is not provided")
+	}
+
 	viper.AddConfigPath(path)
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
@@ -24,7 +35,6 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 
-	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
