@@ -11,7 +11,6 @@ import (
 	"github.com/mymmrac/telego"
 )
 
-const uniswap = "https://app.uniswap.org/swap"
 const dexScreener = "https://dexscreener.com"
 
 type Bot struct {
@@ -71,7 +70,6 @@ func (bot Bot) generateSwapUrl(token transaction.Token, txType string) string {
 	swapUrl, _ := url.Parse(bot.Chain.Swap.Url)
 
 	query := url.Values{}
-	// TODO: Change the base currency based on chain
 	query.Add("chain", bot.Chain.Name)
 	if txType == "IN" {
 		query.Add("inputCurrency", "eth")
@@ -80,9 +78,8 @@ func (bot Bot) generateSwapUrl(token transaction.Token, txType string) string {
 		query.Add("inputCurrency", token.Address)
 		query.Add("outputCurrency", "eth")
 	}
-	swapUrl.RawQuery = query.Encode()
 
-	return swapUrl.String()
+	return swapUrl.String() + "?" + query.Encode()
 }
 
 func (bot Bot) generateMarkup(tx transaction.Transaction) *telego.InlineKeyboardMarkup {
