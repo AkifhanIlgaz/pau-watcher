@@ -9,7 +9,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// TODO: Add other chains
 var chainToScan = map[string]string{
 	"base":   "https://basescan.org/tokentxns",
 	"fantom": "https://ftmscan.com/tokentxns",
@@ -22,10 +21,10 @@ type Parser struct {
 }
 
 func NewParser(cfg *config.Config) Parser {
-	scanUrl, _ := url.Parse(chainToScan[cfg.Chain])
+	scanUrl, _ := url.Parse(cfg.Chain.Scan)
 
 	values := url.Values{}
-	values.Add("a", cfg.Pau)
+	values.Add("a", cfg.SearchAddress)
 
 	scanUrl.RawQuery = values.Encode()
 

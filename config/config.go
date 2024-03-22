@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/AkifhanIlgaz/pau-watcher/chain"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -11,18 +12,24 @@ import (
 type Config struct {
 	TelegramToken string `mapstructure:"TELEGRAM_TOKEN"`
 	ChatId        int64  `mapstructure:"CHAT_ID"`
-	Pau           string `mapstructure:"PAU"`
-	Chain         string
+	SearchAddress string `mapstructure:"SEARCH_ADDRESS"`
+	Chain         chain.Chain
 }
 
 func Load(path string) (*Config, error) {
 	var config Config
 
-	pflag.StringVar(&config.Chain, "chain", "", "Chain")
+	ch := pflag.String("chain", "", "Chain")
 	pflag.Parse()
 
-	if len(config.Chain) == 0 {
+	if len(*ch) == 0 {
 		return nil, errors.New("chain is not provided")
+	}
+
+	if selectedChain, ok := chain.Chains[*ch]; !ok {
+		return nil, fmt.Errorf("chain %s is not supported", *ch)
+	} else {
+		config.Chain = selectedChain
 	}
 
 	viper.AddConfigPath(path)

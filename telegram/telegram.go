@@ -18,6 +18,7 @@ type Bot struct {
 	*telego.Bot
 	*telego.Chat
 	config.Config
+	sb strings.Builder
 }
 
 func NewBot(config *config.Config) (Bot, error) {
@@ -35,52 +36,43 @@ func NewBot(config *config.Config) (Bot, error) {
 		Bot:    bot,
 		Chat:   chat,
 		Config: *config,
+		sb:     strings.Builder{},
 	}, nil
 }
 
-func (bot Bot) Send(tx transaction.Transaction, chain string) {
-	markup := &telego.InlineKeyboardMarkup{}
-	buttons := []telego.InlineKeyboardButton{
-		{Text: "Trade on UniSwap",
-			// TODO: Get chain from tx
-			URL: generateSwapUrl(uniswap, chain, tx.Token, tx.Type)},
-		{Text: "See on DexScreener",
-			URL: generateDexUrl("base", tx.Token, bot.Pau)},
-	}
+func (bot Bot) Send(tx transaction.Transaction) {
+	message := bot.generateMessage(tx)
+	markup := bot.generateMarkup(tx)
 
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("<b>%v</b>\n", tx.Token.Name))
-	if tx.Type == "IN" {
-		sb.WriteString("🟢 <i>Buy</i>")
-	} else {
-		sb.WriteString("🔴 <i>Sell</i>")
-	}
-
-	defer sb.Reset()
-
-	_, err := bot.SendMessage(&telego.SendMessageParams{ChatID: bot.ChatID(), Text: sb.String(), ParseMode: "html", ReplyMarkup: markup.WithInlineKeyboard(buttons)})
+	_, err := bot.SendMessage(&telego.SendMessageParams{
+		ChatID:      bot.ChatID(),
+		Text:        message,
+		ParseMode:   "html",
+		ReplyMarkup: markup,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func generateDexUrl(chain string, token transaction.Token, maker string) string {
+func (bot Bot) generateDexUrl(token transaction.Token) string {
 	dexUrl, _ := url.Parse(dexScreener)
-	dexUrl = dexUrl.JoinPath(chain, token.Address)
+	dexUrl = dexUrl.JoinPath(bot.Chain.Name, token.Address)
 
 	query := url.Values{}
-	query.Add("maker", maker)
+	query.Add("maker", bot.SearchAddress)
 
 	dexUrl.RawQuery = query.Encode()
 
 	return dexUrl.String()
 }
 
-func generateSwapUrl(swapSite string, chain string, token transaction.Token, txType string) string {
-	swapUrl, _ := url.Parse(swapSite)
+func (bot Bot) generateSwapUrl(token transaction.Token, txType string) string {
+	swapUrl, _ := url.Parse(bot.Chain.Swap.Url)
 
 	query := url.Values{}
-	query.Add("chain", chain)
+	// TODO: Change the base currency based on chain
+	query.Add("chain", bot.Chain.Name)
 	if txType == "IN" {
 		query.Add("inputCurrency", "eth")
 		query.Add("outputCurrency", token.Address)
@@ -88,8 +80,39 @@ func generateSwapUrl(swapSite string, chain string, token transaction.Token, txT
 		query.Add("inputCurrency", token.Address)
 		query.Add("outputCurrency", "eth")
 	}
-
 	swapUrl.RawQuery = query.Encode()
 
 	return swapUrl.String()
+}
+
+func (bot Bot) generateMarkup(tx transaction.Transaction) *telego.InlineKeyboardMarkup {
+	markup := &telego.InlineKeyboardMarkup{}
+	buttons := []telego.InlineKeyboardButton{
+		{
+			Text: "Trade on " + bot.Chain.Swap.Name,
+			URL:  bot.generateSwapUrl(tx.Token, tx.Type),
+		},
+		{
+			Text: "See on DexScreener",
+			URL:  bot.generateDexUrl(tx.Token),
+		},
+	}
+
+	return markup.WithInlineKeyboard(buttons)
+}
+
+// TODO: Did builder reset ?
+// TODO: Capitalize chain name
+func (bot Bot) generateMessage(tx transaction.Transaction) string {
+	bot.sb.WriteString(fmt.Sprintf("<b>%v</b>\n", tx.Token.Name))
+	bot.sb.WriteString(fmt.Sprintf("<b>Chain</b>: %v\n", bot.Chain.Name))
+	if tx.Type == "IN" {
+		bot.sb.WriteString("🟢 <i>Buy</i>")
+	} else {
+		bot.sb.WriteString("🔴 <i>Sell</i>")
+	}
+
+	defer bot.sb.Reset()
+
+	return bot.sb.String()
 }

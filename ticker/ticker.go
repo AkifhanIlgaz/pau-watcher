@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/AkifhanIlgaz/pau-watcher/chain"
 	"github.com/AkifhanIlgaz/pau-watcher/config"
 	"github.com/AkifhanIlgaz/pau-watcher/telegram"
 	"github.com/AkifhanIlgaz/pau-watcher/transaction"
@@ -14,7 +15,7 @@ type Ticker struct {
 	bot      telegram.Bot
 	parser   transaction.Parser
 	interval time.Duration
-	chain    string
+	chain    chain.Chain
 	lastTx   transaction.Transaction
 }
 
@@ -49,7 +50,7 @@ func (ticker *Ticker) Start() {
 		if tx.Timestamp.After(ticker.lastTx.Timestamp) {
 			fmt.Println("Last tx changed")
 			ticker.lastTx = tx
-			ticker.bot.Send(tx, ticker.chain)
+			ticker.bot.Send(tx)
 		}
 	}
 }
