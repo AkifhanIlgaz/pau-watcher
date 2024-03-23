@@ -24,7 +24,7 @@ func NewParser(cfg *config.Config) Parser {
 	scanUrl, _ := url.Parse(cfg.Chain.Scan)
 
 	values := url.Values{}
-	values.Add("a", cfg.SearchAddress)
+	values.Add("a", cfg.WatchAddress)
 
 	scanUrl.RawQuery = values.Encode()
 

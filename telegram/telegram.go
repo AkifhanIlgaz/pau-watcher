@@ -59,7 +59,7 @@ func (bot Bot) generateDexUrl(token transaction.Token) string {
 	dexUrl = dexUrl.JoinPath(bot.Chain.Name, token.Address)
 
 	query := url.Values{}
-	query.Add("maker", bot.SearchAddress)
+	query.Add("maker", bot.WatchAddress)
 
 	dexUrl.RawQuery = query.Encode()
 
@@ -98,6 +98,7 @@ func (bot Bot) generateMarkup(tx transaction.Transaction) *telego.InlineKeyboard
 	return markup.WithInlineKeyboard(buttons)
 }
 
+// TODO: Watch address
 // TODO: Did builder reset ?
 // TODO: Capitalize chain name
 func (bot Bot) generateMessage(tx transaction.Transaction) string {

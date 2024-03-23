@@ -12,7 +12,7 @@ import (
 type Config struct {
 	TelegramToken string `mapstructure:"TELEGRAM_TOKEN"`
 	ChatId        int64  `mapstructure:"CHAT_ID"`
-	SearchAddress string `mapstructure:"SEARCH_ADDRESS"`
+	WatchAddress  string `mapstructure:"WATCH_ADDRESS"`
 	Chain         chain.Chain
 }
 
