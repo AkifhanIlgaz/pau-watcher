@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -27,6 +28,13 @@ func lastTransaction(document *goquery.Document) (Transaction, error) {
 	var error error
 
 	document.Find("tbody tr:first-child").Each(func(i int, s *goquery.Selection) {
+		r, err := s.Html()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(r)
+
 		timestamp, err := parseTimeStamp(s)
 		if err != nil {
 			error = err
