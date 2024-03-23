@@ -44,9 +44,6 @@ func (parser *Parser) Parse() (Transaction, error) {
 
 	defer resp.Body.Close()
 
-	fmt.Println("url", resp.Request.URL)
-	fmt.Println("status", resp.Status)
-
 	document, err := goquery.NewDocumentFromReader(resp.Body)
 	fmt.Println(document.Size())
 	if err != nil {
