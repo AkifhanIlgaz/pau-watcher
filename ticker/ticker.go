@@ -40,7 +40,6 @@ func (ticker *Ticker) Start() {
 
 	for next := range c {
 		_ = next
-		fmt.Println("Tick")
 
 		tx, err := ticker.parser.Parse()
 		if err != nil {

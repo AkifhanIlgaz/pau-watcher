@@ -15,6 +15,5 @@ func main() {
 	}
 
 	ticker := ticker.NewTicker(cfg, 10*time.Second)
-
 	ticker.Start()
 }
