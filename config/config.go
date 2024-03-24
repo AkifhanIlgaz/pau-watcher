@@ -20,6 +20,7 @@ func Load(path string) (*Config, error) {
 	var config Config
 
 	ch := pflag.String("chain", "", "Chain")
+	pflag.StringVar(&config.WatchAddress, "address", "0x2433f77f39815849ede7959c7c43d876242cc4bc", "Watch Address")
 	pflag.Parse()
 
 	if len(*ch) == 0 {

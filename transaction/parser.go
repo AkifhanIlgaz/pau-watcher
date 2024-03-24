@@ -45,7 +45,6 @@ func (parser *Parser) Parse() (Transaction, error) {
 	defer resp.Body.Close()
 
 	document, err := goquery.NewDocumentFromReader(resp.Body)
-	fmt.Println(document.Size())
 	if err != nil {
 		return Transaction{}, fmt.Errorf("parse transaction: %w", err)
 	}
