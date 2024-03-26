@@ -42,7 +42,7 @@ func (parser *Parser) Parse() (Transaction, error) {
 	if err != nil {
 		return Transaction{}, fmt.Errorf("client: could not create request: %s", err)
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148")
 
 	resp, err := parser.client.Do(req)
 	if err != nil {
