@@ -37,10 +37,19 @@ func NewParser(cfg *config.Config) Parser {
 }
 
 func (parser *Parser) Parse() (Transaction, error) {
-	resp, err := parser.client.Get(parser.scanUrl)
+
+	req, err := http.NewRequest(http.MethodGet, parser.scanUrl, nil)
+	if err != nil {
+		return Transaction{}, fmt.Errorf("client: could not create request: %s", err)
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")
+
+	resp, err := parser.client.Do(req)
 	if err != nil {
 		return Transaction{}, fmt.Errorf("parse transaction: %w", err)
 	}
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Request.UserAgent())
 
 	defer resp.Body.Close()
 
